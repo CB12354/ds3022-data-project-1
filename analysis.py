@@ -24,6 +24,8 @@ def translate(timeframe, time):
 
 try:
     con = duckdb.connect(database="emissions.duckdb",read_only=False)
+    fig, ax1 = plt.subplots(figsize=(8, 6))
+    ax2 = ax1.twinx()
     for color in ["yellow","green"]:
         # Most carbon-intensive trip
         print(f"""Most carbon-intensive trip for {color} taxis: 
@@ -49,13 +51,21 @@ try:
                             ORDER BY month_of_year ASC""").fetchall()
         df = pd.DataFrame(df, columns=['month', 'co2'])
         df['logco2'] = np.log(df['co2'])
-        sns.lineplot(df, x='month', y='co2', label=color).set_title(f"NYC Taxi Emissions Over 2024")
+        axes = ax1 if color == "yellow" else ax2
+        col_ticks = color[:1]
+        axes.plot(df['month'], df['co2'], color=col_ticks, label=color)
+        axes.tick_params(axis='y',labelcolor=col_ticks)
+        #sns.lineplot(df, x='month', y='co2', label=color).set_title(f"NYC Taxi Emissions Over 2024")
     plt.xlabel("Month of year")
-    plt.ylabel("CO2 emissions (kg)")
-    plt.xticks(ticks=np.arange(1,13, step=1), 
+    plt.title("NYC Taxi Emissions over 2024")
+    ax1.ticklabel_format(axis='y', scilimits=(0, 0))
+    ax2.ticklabel_format(axis='y', scilimits=(0, 0))
+    ax1.set_ylabel("CO2 emissions (kg)")
+    ax2.set_ylabel("CO2 emissions (kg)")
+    ax1.set_xticks(ticks=np.arange(1,13, step=1), 
                labels=months,
                rotation=45)
-    plt.savefig(f"monthly_emissions.png",bbox_inches="tight")
+    plt.savefig(f"monthly_emissions_duo.png",bbox_inches="tight")
     plt.clf()
     
 except Exception as e:

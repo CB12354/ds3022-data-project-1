@@ -46,22 +46,26 @@ def load_parquet_files():
         n = con.execute("SELECT COUNT(*) FROM vehicle_emissions").fetchone()[0]
         print(f"vehicle_emissions: {n} rows loaded")
         logger.info(f"vehicle_emissions: {n} rows loaded")
-        for color_vars in [('yellow', "t"), ('green',"l")]:
+        for color, lead in zip(['yellow','green'],['t','l']):
             for month in range(1, 13):
-                cmd = f"CREATE TABLE {color_vars[0]}_trips AS" if month==1 else f"INSERT INTO {color_vars[0]}_trips"
-                url = f'https://d37ci6vzurychx.cloudfront.net/trip-data/{color_vars[0]}_tripdata_2024-{month:02d}.parquet'
+                cmd = f"CREATE TABLE {color}_trips AS" if month==1 else f"INSERT INTO {color}_trips"
+                url = f'https://d37ci6vzurychx.cloudfront.net/trip-data/{color}_tripdata_2024-{month:02d}.parquet'
                 con.execute(f"""
                     {cmd} 
                     SELECT 
                         VendorID, 
-                        {color_vars[1]}pep_pickup_datetime AS pickup_time, 
-                        {color_vars[1]}pep_dropoff_datetime AS dropoff_time, 
+                        {lead}pep_pickup_datetime AS pickup_time, 
+                        {lead}pep_dropoff_datetime AS dropoff_time, 
                         passenger_count, 
                         trip_distance 
                     FROM read_parquet('{url}');
                             """)
-                print("Fetched data")
-                logger.info("Fetched data")
+                print(f"Fetched data for month: {month}")
+                print(f"Average trip distance: {con.execute(f"""SELECT AVG(trip_distance) FROM {color}_trips""").fetchone()[0]}")
+                logger.info(f"Fetched data for month: {month}")
+                logger.info(f"Average trip distance: {con.execute(f"""SELECT AVG(trip_distance) FROM {color}_trips""").fetchone()[0]}")
+                
+                
 
     except Exception as e:
         print(f"Caught exception: {e}")

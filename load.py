@@ -9,20 +9,29 @@ import logging
 # A lookup table of vehicle_emissions based on the included CSV file above.
 
 
-logging.basicConfig(
-    level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',
-    filename='load.log'
-)
-logger = logging.getLogger(__name__)
-
 def load_parquet_files():
+    """
+    Loads three tables from parquet files: 
+    NYC yellow taxi data, January to December 2024.
+    NYC green taxi data, January to December 2024.
+    Vehicle emissions data for different vehicle types.
+    """
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+
+    handler = logging.FileHandler('load.log')
+    handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+
+    logger.addHandler(handler)
+    logger.propagate = False
 
     con = None
 
     try:
         # Connect to local DuckDB instance
         con = duckdb.connect(database='emissions.duckdb', read_only=False)
-        logger.info("Connected to DuckDB instance")
+        print("Connected to DDB instance - Load")
+        logger.info("Connected to DuckDB instance - Load")
 
         con.execute(f"""
             DROP TABLE IF EXISTS vehicle_emissions;
@@ -32,8 +41,10 @@ def load_parquet_files():
             SELECT * FROM read_csv_auto(
                 'data/vehicle_emissions.csv');
         """)
-        logger.info("Dropped table if exists")
+        print("Dropped tables if exists")
+        logger.info("Dropped tables if exists")
         n = con.execute("SELECT COUNT(*) FROM vehicle_emissions").fetchone()[0]
+        print(f"vehicle_emissions: {n} rows loaded")
         logger.info(f"vehicle_emissions: {n} rows loaded")
         for color_vars in [('yellow', "t"), ('green',"l")]:
             for month in range(1, 13):
@@ -49,10 +60,13 @@ def load_parquet_files():
                         trip_distance 
                     FROM read_parquet('{url}');
                             """)
+                print("Fetched data")
+                logger.info("Fetched data")
 
     except Exception as e:
-        print(f"An error occurred: {e}")
-        logger.error(f"An error occurred: {e}")
+        print(f"Caught exception: {e}")
+        logger.error(f"Caught exception: {e}")
+        exit()
 
 if __name__ == "__main__":
     load_parquet_files()

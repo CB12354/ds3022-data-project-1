@@ -15,7 +15,7 @@ I made reusability the key focus through my program. Throughout the approach I t
 
 I also tried to make sure that the pipeline never conflicts with itself. Column additions and table drops are always if the respective column does not exist or respective table does exist, data loading gives a fresh copy of the data each time, etc.
 
-Readability is another key factor. Code is largely commented and throughout the process I made verification print-outs to ensure the calculations were performed correctly. 
+Readability is another key factor. Code is largely commented and throughout the process I made verification print-outs to ensure the calculations were performed correctly. For the graph of emissions, the graph without Y scaling (monthly_emissions.png) borders on unreadable for green taxis. I believe demonstrating how usage changes from month to month per taxi type is more important, so I made another graph with two Y axes (one per taxi type) that more appropriately demonstrates these changes.
 
 ## Running
 Make sure DuckDB is installed. Then, clone this repository and run this in the terminal at its folder (MacOS):

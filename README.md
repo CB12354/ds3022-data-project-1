@@ -18,7 +18,7 @@ I also tried to make sure that the pipeline never conflicts with itself. Column 
 Readability is another key factor. Code is largely commented and throughout the process I made verification print-outs to ensure the calculations were performed correctly. 
 
 ## Running
-Make sure DuckDB is installed. Then, clone this repository and run this in the terminal at its folder:
+Make sure DuckDB is installed. Then, clone this repository and run this in the terminal at its folder (MacOS):
 ```bash
 python -m venv .venv
 source .venv/bin/activate

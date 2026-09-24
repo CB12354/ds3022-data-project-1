@@ -8,6 +8,20 @@ import logging
 # A full table of GREEN taxi trips for all of 2024.
 # A lookup table of vehicle_emissions based on the included CSV file above.
 
+logger = None
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+handler = logging.FileHandler('load.log')
+handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+
+logger.addHandler(handler)
+logger.propagate = False
+
+def report(msg):
+    global logger
+    print(msg)
+    logger.info(msg)
 
 def load_parquet_files():
     """
@@ -16,22 +30,13 @@ def load_parquet_files():
     NYC green taxi data, January to December 2024.
     Vehicle emissions data for different vehicle types.
     """
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-
-    handler = logging.FileHandler('load.log')
-    handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-
-    logger.addHandler(handler)
-    logger.propagate = False
-
+    global logger
     con = None
 
     try:
         # Connect to local DuckDB instance
         con = duckdb.connect(database='emissions.duckdb', read_only=False)
-        print("Connected to DDB instance - Load")
-        logger.info("Connected to DuckDB instance - Load")
+        report("Connected to DDB instance - Load")
 
         con.execute(f"""
             DROP TABLE IF EXISTS vehicle_emissions;
@@ -41,12 +46,11 @@ def load_parquet_files():
             SELECT * FROM read_csv_auto(
                 'data/vehicle_emissions.csv');
         """)
-        print("Dropped tables if exists")
-        logger.info("Dropped tables if exists")
+        report("Dropped tables if exists")
         n = con.execute("SELECT COUNT(*) FROM vehicle_emissions").fetchone()[0]
-        print(f"vehicle_emissions: {n} rows loaded")
-        logger.info(f"vehicle_emissions: {n} rows loaded")
+        report(f"vehicle_emissions: {n} rows loaded")
         for color, lead in zip(['yellow','green'],['t','l']):
+            report(f"Loading {color} taxi dataset...")
             for month in range(1, 13):
                 cmd = f"CREATE TABLE {color}_trips AS" if month==1 else f"INSERT INTO {color}_trips"
                 url = f'https://d37ci6vzurychx.cloudfront.net/trip-data/{color}_tripdata_2024-{month:02d}.parquet'
@@ -60,10 +64,8 @@ def load_parquet_files():
                         trip_distance 
                     FROM read_parquet('{url}');
                             """)
-                print(f"Fetched data for month: {month}")
-                print(f"Average trip distance: {con.execute(f"""SELECT AVG(trip_distance) FROM {color}_trips""").fetchone()[0]}")
-                logger.info(f"Fetched data for month: {month}")
-                logger.info(f"Average trip distance: {con.execute(f"""SELECT AVG(trip_distance) FROM {color}_trips""").fetchone()[0]}")
+                report(f"Fetched data for month: {month}")
+                report(f"Average trip distance: {con.execute(f"""SELECT AVG(trip_distance) FROM {color}_trips""").fetchone()[0]}")
                 
                 
 

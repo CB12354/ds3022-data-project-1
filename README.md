@@ -11,11 +11,11 @@ This is an ELT pipeline that ingests data from 2024 about yellow and green taxi 
 I made reusability the key focus through my program. Throughout the approach I tried to make the program iterate over repeating code, including, but not limited to:
 - Yellow and green taxis
 - The date columns, using zip() for pairs of column name and command required
-- Strings to be printed and logged
+- Strings to be printed and logged are in a report command
 
 I also tried to make sure that the pipeline never conflicts with itself. Column additions and table drops are always if the respective column does not exist or respective table does exist, data loading gives a fresh copy of the data each time, etc.
 
-Readability is another key factor. Code is largely commented and throughout the process I made verification print-outs to ensure the calculations were performed correctly. For the graph of emissions, the graph without Y scaling ([monthly_emissions.png](monthly_emissions.png)) borders on unreadable for green taxis. I believe demonstrating how usage changes from month to month per taxi type is more important, so I made another graph with two Y axes (one per taxi type, [monthly_emissions_duo.png](monthly_emissions_duo.png)) that more appropriately demonstrates these changes.
+Readability is another key factor. Code is largely commented and throughout the process I made verification print-outs to ensure the calculations were performed correctly. For the graph of emissions, the graph without Y scaling borders on unreadable for green taxis. I believe demonstrating how usage changes from month to month per taxi type is more important, so I made the graph with two Y axes (one per taxi type, on each side, [monthly_emissions_duo.png](monthly_emissions_duo.png)) that more appropriately demonstrates these changes.
 
 ## Running
 Make sure DuckDB is installed. Then, clone this repository and run this in the terminal at its folder (MacOS):
